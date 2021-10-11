@@ -1,0 +1,10 @@
+<launch>
+  <node pkg="lane_detector" type="right_line_detection.py" name="right_line_detection" output = "screen">
+  </node>
+  <node pkg="lane_detector" type="left_line_detection.py" name="left_line_detection" output = "screen" >
+  </node>
+  <node pkg="control" type="control" name="control"  >
+  </node>
+</launch>
+
+<!-- Per printar per pantalla: output="screen" --> 

@@ -1,0 +1,143 @@
+#! /usr/bin/env python
+
+import rospy
+from std_msgs.msg import String
+from sensor_msgs.msg import LaserScan
+
+
+class scaner(object):
+    def __init__(self):
+        self.pub_front_obstacle= rospy.Publisher('/laser/front_obstacle_turn', String, queue_size=10)
+        self.sub_angle=rospy.Subscriber('/scan_filtered_angle', LaserScan, self.callback_frontal_obstacle)
+        self.sub_angle=rospy.Subscriber('/scan', LaserScan, self.callback_detect_parking)
+        self.sub_left_line_type=rospy.Subscriber('/vision/left_line_type', String, self.callback_left_line_type)
+        self.sub_right_line_type=rospy.Subscriber('/vision/right_line_type', String, self.callback_right_line_type)
+        
+
+        """Variables"""
+        self.left_line_type=""
+        self.right_line_type=""
+        self.front_obstacle_turn=""
+        self.front_obstacle_enable=1
+
+
+    def callback_left_line_type(self, msg):
+        self.left_line_type=msg.data
+
+    def callback_right_line_type(self, msg):   
+        self.right_line_type=msg.data
+
+
+    def callback_frontal_obstacle(self, msg):
+
+        obstacle=False;
+        counter_obstacle=0
+        front_max_distance=1
+        front_max_points=25
+        for i in range (len(msg.ranges)):        
+            if msg.ranges[i]<front_max_distance:
+                counter_obstacle+=1
+            if counter_obstacle>front_max_points:
+                obstacle = True
+                break
+        if obstacle ==True:
+            if self.right_line_type=="cont" and self.left_line_type=="disc":               
+                self.front_obstacle_turn="left"
+            elif self.left_line_type=="cont" and self.right_line_type=="disc":
+                self.front_obstacle_turn="right"
+            else:
+                self.front_obstacle_turn=""
+        else:
+            self.front_obstacle_turn=""
+            
+        self.obstacle_avoid()
+    
+
+    def callback_detect_parking(self, msg):
+        high_corner=None
+        low_corner=None
+        for i in range (5, len(msg.ranges)-5):
+            if (msg.ranges[i] > 0.88 and msg.ranges[i]<0.95) and (msg.ranges[i+3] > msg.ranges[i] and msg.ranges[i-3]> msg.ranges[i]) and ((i>275 and i<325) or (i<125 and i > 75)):
+                high_corner=i
+                for j in range (i-5 , i+5):
+                    if abs(msg.ranges[j]-msg.ranges[i]) > 0.2:
+                        high_corner=None
+                        
+                
+            if (msg.ranges[i] > 0.55 and msg.ranges[i] < 0.65):
+                low_corner=i
+                if (msg.ranges[i-1]>1.2):      
+                    for j in range (i-5, i):
+                        if msg.ranges[j] < 1.2 :
+                            low_corner=None
+                            
+                elif (msg.ranges[i+1]>1.2):      
+                    for j in range (i, i+5):
+                        if msg.ranges[j] < 1.2 :
+                            low_corner=None
+                            
+                
+        print "high" , high_corner
+        print "low", low_corner
+        if high_corner !=None and low_corner !=None:
+            print "high" , high_corner
+            print "low", low_corner
+
+            if high_corner > (len(msg.ranges)/2) and low_corner > (len(msg.ranges)/2) :
+                print "parking right"
+                parking_right=True
+            elif high_corner < (len(msg.ranges)/2) and low_corner < (len(msg.ranges)/2):
+                parking_left=True
+                print "parking left"
+                
+                
+                    
+    
+    
+    """
+    parking_right=False
+    parking_left=False
+    for i in range (5, len(msg.ranges)-5):
+        if msg.ranges[i] < 2:
+            if msg.ranges[i+1] > 3:
+                parking_left=True
+            elif msg.ranges[i-1] > 3:
+                parking_right= True
+                
+    if parking_right==True:
+        print "park_right"
+    if parking_left==True:
+        print "park_left"
+    """
+    """
+    for i in range (80, 120, 2):
+        if msg.ranges[i] == float('+inf'):
+            if msg.ranges[i-10]<1.5:
+                parking_left=True
+            elif msg.ranges[i+10]<1.5:
+                parking_right=True
+    """
+    """
+    if (msg.ranges[100] == float('+inf')):
+        print msg.ranges[100-3]
+        print msg.ranges[100+5]
+    """
+
+
+
+
+    def obstacle_avoid(self):
+        if self.front_obstacle_turn != "" and self.front_obstacle_enable==1:
+            self.pub_front_obstacle.publish(self.front_obstacle_turn)
+        
+if __name__ == '__main__':
+    
+   
+    rospy.init_node('scan')
+    scaner= scaner()
+    
+    try:
+        rospy.spin()
+    except rospy.ROSInterruptException or KeyboardInterrupt:
+        print("Shutting down")
+        

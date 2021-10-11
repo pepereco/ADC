@@ -1,0 +1,9 @@
+
+<launch>
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+      name="laser_filter_angle">
+    <rosparam command="load" file="laser_config_angle.yaml" />
+    <remap from="scan_filtered_min_range" to="scan_filtered_angle" /> -->
+  </node>
+</launch>
+

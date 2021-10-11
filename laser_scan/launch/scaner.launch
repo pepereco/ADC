@@ -1,0 +1,15 @@
+<launch>
+  <node pkg="laser_scan" type="scan.py" name="laser_scaner" output="screen">
+  </node>
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+      name="laser_filter_angle">
+    <rosparam command="load" file="laser_config_angle.yaml" />
+    <remap from="scan_filtered" to="scan_filtered_angle" /> -->
+  </node>
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain"
+      name="laser_filter_interpolation">
+    <rosparam command="load" file="laser_config_interpolation.yaml" />
+    <remap from="scan_filtered" to="scan_filtered_interpolation" /> -->
+  </node>
+  
+</launch>

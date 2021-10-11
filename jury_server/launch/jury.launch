@@ -1,0 +1,8 @@
+<launch>
+<include file="$(find iri_adc_jury)/launch/test.launch">
+  </include>
+  <node pkg="jury_server" type="juryServer" name="juryServer" output="screen" >	
+  </node>
+</launch>
+
+<!-- Per printar per pantalla: output="screen" --> 

@@ -1,0 +1,128 @@
+#include "ros/ros.h"
+#include "geometry_msgs/Twist.h"
+#include "std_msgs/Float64.h"
+#include <sstream>
+#include <iostream>
+#include <string>
+
+#define MIN_VALUE_DESV 100
+
+
+geometry_msgs::Twist tx_msg;
+
+void direction( std::string from, float value){
+  static std::string turning_from;  
+  static float angular_z;
+  
+  if (abs(value)<MIN_VALUE_DESV && value > 0){
+    if (from=="center_line"){
+      angular_z= (MIN_VALUE_DESV-value)*-0.2;
+      turning_from=from;
+    }
+    else if (from=="right_line"){
+	angular_z= (MIN_VALUE_DESV-value)*0.2;
+	turning_from=from;	
+    }    
+  }
+  else if (value < 0 ){
+    if (from=="center_line"){
+      angular_z= 50*0.2;
+      turning_from=from;
+    }
+    else if (from=="right_line"){
+	angular_z= 50*- 0.2;
+	turning_from=from;	
+    } 
+  }
+  else if (from == turning_from){
+    angular_z=0;
+  }
+  tx_msg.angular.z = angular_z;
+  tx_msg.linear.x = 5;
+}  
+  
+
+
+void front_center_desv_Callback( const std_msgs::Float64 rx_msg){
+  direction("center_line",rx_msg.data);   
+}
+
+void front_right_desv_Callback( const std_msgs::Float64 rx_msg){
+  direction("right_line", rx_msg.data);  
+}
+
+  /*
+  float z_vel;
+  float x_vel = 3.0;
+  
+  if (abs(rx_msg.data)>150){
+    if (turning==false)
+      z_vel=0;
+  }
+  
+  else{
+    z_vel=(150-rx_msg.data)*-0.05;
+    turning=true;
+  }
+    
+  
+  
+  tx_msg.linear.x = x_vel;
+  tx_msg.angular.z = z_vel;
+  */
+
+  
+
+int main(int argc, char **argv)
+{
+  
+  /**
+   * The ros::init() function needs to see argc and argv so that it can perform
+   * any ROS arguments and name remapping that were provided at the command line.
+   * For programmatic remappings you can use a different version of init() which takes
+   * remappings directly, but for most command-line programs, passing argc and argv is
+   * the easiest way to do it.  The third argument to init() is the name of the node.
+   *
+   * You must call one of the versions of ros::init() before using any other
+   * part of the ROS system.
+   */
+  ros::init(argc, argv, "talker");
+
+  ros::NodeHandle n;
+  ros::Publisher chatter_pub = n.advertise<geometry_msgs::Twist>("/adc_car/cmd_vel", 1000);
+
+  
+  tx_msg.linear.x = 0;
+  tx_msg.angular.z = 0;
+  
+  ros::Subscriber sub1 = n.subscribe("/control/front_center_desviation",10,front_center_desv_Callback);
+  ros::Subscriber sub2 = n.subscribe("/control/front_right_desviation",10,front_right_desv_Callback);
+  
+  /*ros::spin();*/
+  
+  ros::Rate loop_rate(100);
+  while (ros::ok())
+  {
+    
+    if (tx_msg.linear.x!=0){
+      /*ROS_INFO("%s", "hel");*/
+    
+      chatter_pub.publish(tx_msg);
+    }
+   
+    ros::spinOnce();
+
+    loop_rate.sleep();
+  }
+  
+  return 0;
+}
+
+
+
+
+
+
+
+
+

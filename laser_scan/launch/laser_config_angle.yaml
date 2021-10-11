@@ -1,0 +1,14 @@
+#Configuració detector parking frontal (agafa angle de 60 graus frontals)
+scan_filter_chain:
+- name: angle
+  type: laser_filters/LaserScanAngularBoundsFilter
+  params:
+    lower_angle: 2.57
+    upper_angle: 3.57
+
+#El angulo de 1.57 a 4.71 es de 180 grados, 1.57 corresponde a los 180 grados i 4.71 al grado 0.
+
+
+#foco de 90 grados en el centro
+#lower_angle: 2.355
+#upper_angle: 3.92

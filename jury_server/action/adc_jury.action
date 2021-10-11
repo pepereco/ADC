@@ -1,0 +1,9 @@
+###action
+#goals
+adc_goal_array goals
+---
+#result
+---
+#feedback
+string status
+geometry_msgs/PoseStamped base_position

@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="xodr_bridge" type="xodr.py" name="xodr" output="screen">
+  </node>
+  
+</launch>

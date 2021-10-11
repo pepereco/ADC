@@ -1,0 +1,4 @@
+- Fer que si s'indica (per el parking goals) enlloc de indicar
+  el lloc on parar, indicar el parking més proper i una llista
+  de les places d'aparcament per ordre de proximitat (per a Llavors
+  tenir més d'una opció en cas de places ocupades).

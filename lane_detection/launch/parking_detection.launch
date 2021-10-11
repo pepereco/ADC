@@ -1,0 +1,17 @@
+<launch>
+
+  <node pkg="lane_detector" type="parking_right.py" name="parking_right" output = "screen">
+  </node>
+
+  <node pkg="lane_detector" type="parking_left.py" name="parking_left" output = "screen">
+  </node>
+
+  <node pkg="lane_detector" type="parking_back.py" name="parking_back" output = "screen">
+  </node>
+
+  <node pkg="lane_detector" type="parking_right_batery.py" name="parking_right_batery" output = "screen">
+  </node>
+
+</launch>
+
+<!-- Per printar per pantalla: output="screen" --> 
